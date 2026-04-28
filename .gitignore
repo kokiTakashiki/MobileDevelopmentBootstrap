@@ -1,0 +1,57 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Secrets / credentials
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.p8
+*.cer
+*.mobileprovision
+*.provisionprofile
+*.keystore
+*.jks
+*.pkcs12
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+DerivedData/
+build/
+
+# Android
+local.properties
+.gradle/
+.idea/
+captures/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# Nix
+result
+result-*
+
+# direnv
+.direnv/
+
+# Cloned project sources go inside iOS/, Android/, Flutter/.
+# Track only flake.nix and .envrc at each platform root.
+iOS/*/
+Android/*/
+Flutter/*/
+!iOS/*.nix
+!Android/*.nix
+!Flutter/*.nix

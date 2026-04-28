@@ -1,0 +1,21 @@
+tap "homebrew/bundle"
+
+brew "mas"
+
+mas "Xcode", id: 497799835
+
+brew "nix"
+brew "direnv"
+
+brew "git"
+brew "gh"
+
+cask "android-studio"
+cask "intellij-idea-ce"
+cask "visual-studio-code"
+
+cask "iterm2"
+cask "ghostty"
+
+# cask "rectangle"
+# cask "raycast"
