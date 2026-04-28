@@ -102,22 +102,62 @@ direnv は親ディレクトリの `.envrc` を自動的に発見します。`~/
 
 ### レイヤ図
 
-下層ほどマシン全体で共有され、上層ほどプロジェクト単位で個別化されます。
+上層ほどプロジェクト単位で個別化され、下層ほどマシン全体で共有されます。Makefile は右側から複数層を制御する**起動装置**として機能します。
 
 ```mermaid
-flowchart BT
-    L6["macOS + Apple Silicon<br/>OS / Hardware"]
-    L5["Brewfile 層（マシン単位）<br/>Xcode / Android Studio / IDE / iTerm2 / mas / Nix / direnv / git / gh"]
-    L4["手作業層（マシン単位）<br/>Apple ID サインイン / 証明書 / Provisioning Profile / Android SDK / VSCode 拡張"]
-    L3["Nix flake + direnv 層（プロジェクト箱単位）<br/>iOS / Android / Flutter の flake.nix と .envrc"]
-    L2["プロジェクト固有 CLI ツール群（プロジェクト箱単位）<br/>SwiftLint / Gradle / Kotlin / Flutter / fastlane / cocoapods など"]
-    L1["プロジェクトソースコード（個別リポジトリ）"]
+flowchart TB
+    subgraph L1["プロジェクトソースコード（個別リポジトリ）"]
+        Src(" ")
+    end
 
-    L6 --> L5
-    L5 --> L4
-    L4 --> L3
-    L3 --> L2
-    L2 --> L1
+    subgraph L2["プロジェクト固有ツール群（プロジェクト箱単位）"]
+        direction LR
+        iOS["<b>iOS 用</b><br/>swiftlint / swiftformat<br/>xcbeautify / fastlane<br/>cocoapods / ruby / mise"]
+        Android["<b>Android 用</b><br/>JDK 17 / Gradle / Kotlin<br/>ktlint / detekt / fastlane"]
+        Flutter["<b>Flutter 用</b><br/>flutter / dart<br/>JDK 17 / cocoapods"]
+    end
+
+    subgraph L3["Nix flake + direnv（プロジェクト箱単位）<br/>flake.nix を cd で自動切替"]
+        Nix(" ")
+    end
+
+    subgraph L4["Brewfile（マシン単位）／ brew bundle で適用"]
+        direction LR
+        B1["Xcode / Android Studio<br/>mas / cask"]
+        B2["VSCode / IntelliJ CE<br/>cask"]
+        B3["Nix / direnv<br/>git / gh / mas"]
+        B4["iTerm2 / Ghostty<br/>cask"]
+    end
+
+    subgraph L5["Brewfile 管轄外（手作業必須）／ Makefile が手順を表示"]
+        direction LR
+        M1["Apple ID<br/>証明書"]
+        M2["Provisioning<br/>Profile"]
+        M3["Android SDK<br/>（GUI 設定）"]
+        M4["VSCode 拡張"]
+    end
+
+    L6["macOS + Apple Silicon"]
+
+    Make["<b>Makefile（起動装置）</b><br/>━━━━━━━━<br/>make setup<br/>make setup-brew<br/>make setup-manual<br/>make setup-nix<br/>make verify<br/>━━━━━━━━<br/>自動 ○<br/>手動指示 ○<br/>起動順制御 ○"]
+
+    L1 ~~~ L2
+    L2 ~~~ L3
+    L3 ~~~ L4
+    L4 ~~~ L5
+    L5 ~~~ L6
+
+    Make -. 自動 .-> L4
+    Make -. 指示 .-> L5
+    Make -. 確認 .-> L3
+
+    style L1 fill:#e8e0f5,stroke:#8b7eb8
+    style L2 fill:#d4ead8,stroke:#7ab088
+    style L3 fill:#cee8de,stroke:#6ba88c
+    style L4 fill:#f5dcc0,stroke:#c89f6e
+    style L5 fill:#f5d4d0,stroke:#c8867e
+    style L6 fill:#e8e8e8,stroke:#888
+    style Make fill:#dde6f5,stroke:#7e92b8
 ```
 
 ### 設計のポイント
