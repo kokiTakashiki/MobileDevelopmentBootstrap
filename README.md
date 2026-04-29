@@ -137,12 +137,11 @@ direnv は親ディレクトリの `.envrc` を自動的に発見します。`~/
 </table>
 
 <table width="100%">
-  <tr><td align="center" colspan="4">🟧 <b>L4 ／ Brewfile（マシン単位） ─ brew bundle で適用</b></td></tr>
+  <tr><td align="center" colspan="3">🟧 <b>L4 ／ Brewfile（マシン単位） ─ brew bundle で適用</b></td></tr>
   <tr>
-    <td align="center" width="25%">Xcode<br>Android Studio<br>(mas / cask)</td>
-    <td align="center" width="25%">VSCode<br>IntelliJ CE<br>(cask)</td>
-    <td align="center" width="25%">Nix / direnv<br>git / gh / mas</td>
-    <td align="center" width="25%">iTerm2<br>Ghostty<br>(cask)</td>
+    <td align="center" width="33%">Xcode<br>Android Studio<br>(mas / cask)</td>
+    <td align="center" width="33%">VSCode<br>IntelliJ CE<br>(cask)</td>
+    <td align="center" width="34%">Nix / direnv<br>git / gh / mas</td>
   </tr>
 </table>
 
