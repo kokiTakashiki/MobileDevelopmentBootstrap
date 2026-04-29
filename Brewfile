@@ -1,8 +1,5 @@
-tap "homebrew/bundle"
-
 brew "xcodes"
 
-brew "nix"
 brew "direnv"
 
 brew "git"
