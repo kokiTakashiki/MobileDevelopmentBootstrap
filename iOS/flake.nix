@@ -12,11 +12,6 @@
           xcbeautify
 
           fastlane
-
-          ruby_3_3
-          bundler
-
-          mise
         ];
 
         shellHook = ''
