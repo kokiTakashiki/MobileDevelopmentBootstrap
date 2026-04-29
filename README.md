@@ -102,66 +102,64 @@ direnv は親ディレクトリの `.envrc` を自動的に発見します。`~/
 
 ### レイヤ図
 
-上層ほどプロジェクト単位で個別化され、下層ほどマシン全体で共有されます。Makefile は L3〜L5 を横断する**起動装置**として機能しますが、レイヤ図には含めず直後の表で説明します。
+上層ほどプロジェクト単位で個別化され、下層ほどマシン全体で共有されます。各層は HTML テーブル 1 つで表現し、すべて横幅 100% に揃えています。Makefile は L3〜L5 を横断する**起動装置**として機能しますが、図には含めず直後の表で説明します。
 
-```mermaid
-flowchart TB
-    subgraph L1["L1 ／ プロジェクトソースコード（個別リポジトリ）"]
-        SrcText["iOS / Android / Flutter の各プロジェクトリポジトリ"]
-    end
+<table width="100%">
+  <tr><td align="center" colspan="4">🟪 <b>L1 ／ プロジェクトソースコード（個別リポジトリ）</b></td></tr>
+  <tr><td align="center" colspan="4">iOS / Android / Flutter の各プロジェクトリポジトリ</td></tr>
+</table>
 
-    subgraph L2["L2 ／ プロジェクト固有ツール群（プロジェクト箱単位）"]
-        direction LR
-        iOS["<b>iOS 用</b><br/>swiftlint / swiftformat<br/>xcbeautify / fastlane<br/>cocoapods / ruby / mise"]
-        Android["<b>Android 用</b><br/>JDK 17 / Gradle / Kotlin<br/>ktlint / detekt / fastlane"]
-        Flutter["<b>Flutter 用</b><br/>flutter / dart<br/>JDK 17 / cocoapods"]
-        iOS ~~~ Android
-        Android ~~~ Flutter
-    end
+<table width="100%">
+  <tr><td align="center" colspan="3">🟩 <b>L2 ／ プロジェクト固有ツール群（プロジェクト箱単位）</b></td></tr>
+  <tr>
+    <td align="center" width="33%">
+      <b>iOS 用</b><br>
+      swiftlint / swiftformat<br>
+      xcbeautify / fastlane<br>
+      cocoapods / ruby / mise
+    </td>
+    <td align="center" width="33%">
+      <b>Android 用</b><br>
+      JDK 17 / Gradle / Kotlin<br>
+      ktlint / detekt / fastlane
+    </td>
+    <td align="center" width="34%">
+      <b>Flutter 用</b><br>
+      flutter / dart<br>
+      JDK 17 / cocoapods
+    </td>
+  </tr>
+</table>
 
-    subgraph L3["L3 ／ Nix flake + direnv（プロジェクト箱単位）"]
-        NixText["flake.nix と .envrc ／ cd で自動切替"]
-    end
+<table width="100%">
+  <tr><td align="center">🟦 <b>L3 ／ Nix flake + direnv（プロジェクト箱単位）</b></td></tr>
+  <tr><td align="center">flake.nix と .envrc ／ cd で自動切替</td></tr>
+</table>
 
-    subgraph L4["L4 ／ Brewfile（マシン単位） ─ brew bundle で適用"]
-        direction LR
-        B1["Xcode<br/>Android Studio<br/>(mas / cask)"]
-        B2["VSCode<br/>IntelliJ CE<br/>(cask)"]
-        B3["Nix / direnv<br/>git / gh / mas"]
-        B4["iTerm2<br/>Ghostty<br/>(cask)"]
-        B1 ~~~ B2
-        B2 ~~~ B3
-        B3 ~~~ B4
-    end
+<table width="100%">
+  <tr><td align="center" colspan="4">🟧 <b>L4 ／ Brewfile（マシン単位） ─ brew bundle で適用</b></td></tr>
+  <tr>
+    <td align="center" width="25%">Xcode<br>Android Studio<br>(mas / cask)</td>
+    <td align="center" width="25%">VSCode<br>IntelliJ CE<br>(cask)</td>
+    <td align="center" width="25%">Nix / direnv<br>git / gh / mas</td>
+    <td align="center" width="25%">iTerm2<br>Ghostty<br>(cask)</td>
+  </tr>
+</table>
 
-    subgraph L5["L5 ／ Brewfile 管轄外（手作業必須） ─ Makefile が手順を表示"]
-        direction LR
-        M1["Apple ID<br/>証明書"]
-        M2["Provisioning<br/>Profile"]
-        M3["Android SDK<br/>(GUI 設定)"]
-        M4["VSCode 拡張"]
-        M1 ~~~ M2
-        M2 ~~~ M3
-        M3 ~~~ M4
-    end
+<table width="100%">
+  <tr><td align="center" colspan="4">🟥 <b>L5 ／ Brewfile 管轄外（手作業必須） ─ Makefile が手順を表示</b></td></tr>
+  <tr>
+    <td align="center" width="25%">Apple ID<br>証明書</td>
+    <td align="center" width="25%">Provisioning<br>Profile</td>
+    <td align="center" width="25%">Android SDK<br>(GUI 設定)</td>
+    <td align="center" width="25%">VSCode 拡張</td>
+  </tr>
+</table>
 
-    subgraph L6["L6 ／ OS ／ Hardware"]
-        OSText["macOS + Apple Silicon"]
-    end
-
-    L1 ~~~ L2
-    L2 ~~~ L3
-    L3 ~~~ L4
-    L4 ~~~ L5
-    L5 ~~~ L6
-
-    style L1 fill:#e8e0f5,stroke:#8b7eb8
-    style L2 fill:#d4ead8,stroke:#7ab088
-    style L3 fill:#cee8de,stroke:#6ba88c
-    style L4 fill:#f5dcc0,stroke:#c89f6e
-    style L5 fill:#f5d4d0,stroke:#c8867e
-    style L6 fill:#e8e8e8,stroke:#888
-```
+<table width="100%">
+  <tr><td align="center">⬜ <b>L6 ／ OS ／ Hardware</b></td></tr>
+  <tr><td align="center">macOS + Apple Silicon</td></tr>
+</table>
 
 ### Makefile の役割（層を横断する起動装置）
 
