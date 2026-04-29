@@ -12,7 +12,6 @@
           xcbeautify
 
           fastlane
-          cocoapods
 
           ruby_3_3
           bundler
