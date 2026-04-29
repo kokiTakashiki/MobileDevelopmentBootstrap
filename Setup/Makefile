@@ -1,5 +1,8 @@
 .PHONY: help setup setup-brew setup-xcode setup-manual setup-nix verify
 
+# Brewfile の絶対パスを Makefile 自身の位置から解決（clone 先のディレクトリ名に依存しない）
+BREWFILE := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/Brewfile)
+
 help:
 	@echo "新しいMacのセットアップ手順"
 	@echo ""
@@ -20,6 +23,11 @@ setup: setup-brew setup-xcode setup-manual setup-nix verify
 setup-brew:
 	@echo "==> Homebrewのインストール確認"
 	@which brew > /dev/null 2>&1 || /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+	@if [ ! -L "$(HOME)/Brewfile" ] && [ -e "$(HOME)/Brewfile" ]; then \
+		echo "Error: $(HOME)/Brewfile が既に存在し、シンボリックリンクではありません。手動で退避してください。" && exit 1; \
+	fi
+	@echo "==> $(HOME)/Brewfile → $(BREWFILE) のシンボリックリンクを作成"
+	@ln -sfn "$(BREWFILE)" "$(HOME)/Brewfile"
 	@echo "==> brew bundle 実行"
 	brew bundle --file=$(HOME)/Brewfile
 	@echo "✓ Brewfile適用完了"
