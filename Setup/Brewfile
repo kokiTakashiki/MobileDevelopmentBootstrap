@@ -13,9 +13,3 @@ brew "gh"
 cask "android-studio"
 cask "intellij-idea-ce"
 cask "visual-studio-code"
-
-# 必要になったタイミングで個別に追加してください
-# cask "iterm2"
-# cask "ghostty"
-# cask "rectangle"
-# cask "raycast"
