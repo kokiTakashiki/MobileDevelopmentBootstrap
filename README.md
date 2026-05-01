@@ -1,28 +1,28 @@
 # Mobile Development Bootstrap
 
-macOS（Apple Silicon）上で iOS / Android / Flutter 開発環境を**宣言的・再現可能**に構築するためのセットアップリポジトリです。Brewfile・Makefile・Nix flake の最小構成で、新しい Mac を最短手順で復元できます。
+macOS（Apple Silicon）で iOS / Android / Flutter の開発環境を**宣言的・再現可能**に構築します。Brewfile・Makefile・Nix flake の最小構成で、新しい Mac を最短手順で復元できます。
 
 ## 機能
 
-- **`make setup`**: 新 Mac を 1 コマンドで開発可能な状態まで持っていく起動装置
+- **`make setup`**: 新しい Mac を 1 コマンドで開発可能にする起動スクリプト
   - Homebrew のインストール（未導入時）
-  - Brewfile による GUI / CLI アプリの一括導入（Android Studio / JetBrains Toolbox / VSCode / direnv / xcodes / git / gh）
-  - Nix を Determinate Systems 公式インストーラで導入（Homebrew からは 2024 年に削除されたため）
-  - **`xcodes install --latest` で最新 Xcode を自動取得**＋ライセンス同意（Apple ID / sudo 認証は対話）
-  - 残りの手作業項目（証明書・Toolbox 経由の IntelliJ 等・Android SDK・VSCode 拡張）の対話的ガイド
-  - Nix と direnv の動作確認、最後に環境のサマリ表示
-- **Xcode は xcodes-cli で管理**: Mac App Store ではなく [xcodes-cli](https://github.com/XcodesOrg/xcodes) 経由で developer.apple.com から取得。複数バージョンの並存と切り替え（`xcodes select`）が可能
-- **プラットフォーム別 Nix flake**: iOS / Android / Flutter の各箱で `cd` するだけで、必要な CLI ツール群が PATH に揃う
+  - Brewfile で GUI / CLI アプリを一括導入（Android Studio / JetBrains Toolbox / VSCode / direnv / xcodes / git / gh）
+  - Determinate Systems 公式インストーラで Nix を導入（Homebrew formula は 2024 年に削除）
+  - `xcodes install --latest` で最新 Xcode を取得し、ライセンス同意（Apple ID / sudo 認証は対話）
+  - 手作業項目（証明書・IntelliJ 等・Android SDK・VSCode 拡張）の対話ガイド
+  - Nix / direnv の動作確認と環境サマリの表示
+- **Xcode は xcodes-cli で管理**: [xcodes-cli](https://github.com/XcodesOrg/xcodes) で developer.apple.com から取得。複数バージョンを並存させ `xcodes select` で切り替え可能
+- **プラットフォーム別 Nix flake**: iOS / Android / Flutter の各ディレクトリへ `cd` するだけで、必要な CLI ツールが PATH に通る
   - **iOS**: SwiftLint / SwiftFormat / xcbeautify / fastlane
   - **Android**: JDK 17 / Gradle / Kotlin / ktlint / detekt / fastlane
-  - **Flutter**: flutter / dart / JDK 17 / cocoapods（iOS と Android 両方の shellHook を併記）
-- **Xcode SDK 衝突回避**: iOS / Flutter flake で `unset SDKROOT / DEVELOPER_DIR` し、Nix の SDK と Xcode の SDK を干渉させない
+  - **Flutter**: flutter / dart / JDK 17 / cocoapods（shellHook で iOS の SDK unset と Android SDK パスを併設）
+- **Xcode SDK 衝突回避**: iOS / Flutter flake で `SDKROOT` / `DEVELOPER_DIR` を unset し、Nix と Xcode の SDK 干渉を防ぐ
 
 ## 必要な環境
 
 - macOS 14.0（Sonoma）以降
 - Apple Silicon（M1 / M2 / M3 / M4）— Intel Mac は対象外
-- `/usr/bin/git`（Xcode Command Line Tools に標準同梱、初回呼び出し時にインストール案内が出る）
+- `/usr/bin/git`（Xcode Command Line Tools に同梱。初回呼び出し時に案内が出る）
 
 ## セットアップ
 
@@ -35,27 +35,27 @@ cd <任意のディレクトリのパス>
 make setup
 ```
 
-`~/Brewfile` シンボリックリンクは `setup-brew` が自動作成します（Makefile が自身の位置から Brewfile の絶対パスを解決するため、clone 先のディレクトリ名に依存しません）。
+`~/Brewfile` のシンボリックリンクは `setup-brew` が自動作成します。Makefile は自身の位置から Brewfile の絶対パスを解決するため、clone 先のディレクトリ名に依存しません。
 
 `make setup` は 6 段階で進みます：
 
 | ステップ | 内容 | 自動 / 手動 |
 |---|---|---|
 | `setup-brew` | Homebrew + Brewfile 適用 | 自動 |
-| `setup-nix-install` | Determinate Systems インストーラで Nix を導入 | 半自動（sudo 認証あり） |
-| `setup-xcode` | `xcodes install --latest` で最新 Xcode を取得、ライセンス同意 | 半自動（Apple ID / sudo 認証あり） |
-| `setup-manual` | 証明書 / Toolbox 経由の IntelliJ 等（任意）/ Android SDK / VSCode 拡張の案内 | 手動（対話停止） |
+| `setup-nix-install` | Determinate Systems 公式インストーラで Nix を導入 | 半自動（sudo 認証あり） |
+| `setup-xcode` | `xcodes install --latest` で最新 Xcode を取得しライセンス同意 | 半自動（Apple ID / sudo 認証あり） |
+| `setup-manual` | 証明書 / IntelliJ 等（任意）/ Android SDK / VSCode 拡張の案内 | 手動（対話停止） |
 | `setup-nix` | Nix と direnv の疎通確認 | 自動 |
 | `verify` | 各ツールのバージョン表示 | 自動 |
 
-個別実行も可能（例: `make setup-xcode` のみ、`make verify` のみ）。
+個別実行も可能です（例: `make setup-xcode`、`make verify`）。
 
 ## 使用方法
 
-各プラットフォーム箱（`<repo>/iOS` 等）に実プロジェクトを clone して開発します。以下の例では clone 先を `~/Developer/` としていますが、任意のパスに置き換えて読んでください。
+各プラットフォームディレクトリ（`<repo>/iOS` 等）に実プロジェクトを clone して開発します。以下の例の `~/Developer/` は任意のパスに置き換えてください。
 
 ```bash
-# 例: iOS プロジェクトを iOS 箱に clone
+# 例: iOS プロジェクトを iOS/ 配下に clone
 cd ~/Developer/iOS
 git clone <iOS-project-repo> MyApp
 
@@ -70,16 +70,16 @@ swiftlint --version
 open MyApp.xcodeproj
 ```
 
-direnv は親ディレクトリの `.envrc` を自動的に発見します。`~/Developer/iOS/` 直下に `.envrc` を置いているため、その配下のすべてのプロジェクトで同じツールチェーンが有効になります。
+direnv は親ディレクトリの `.envrc` を自動探索します。`~/Developer/iOS/` 直下に `.envrc` を置けば、配下の全プロジェクトで同じツールチェーンが有効になります。
 
 ## 技術スタック
 
-- **Homebrew** (Brewfile) — マシン単位の GUI / CLI アプリ管理（Nix 以外）
-- **[Determinate Systems Nix Installer](https://github.com/DeterminateSystems/nix-installer)** — Nix 本体のインストール（Homebrew formula が削除されたため）
-- **[xcodes-cli](https://github.com/XcodesOrg/xcodes)** — Xcode 複数バージョンの CLI 管理（developer.apple.com から直接取得、`xcodes select` で切替）
+- **Homebrew** (Brewfile) — GUI / CLI アプリのマシン単位管理
+- **[Determinate Systems Nix Installer](https://github.com/DeterminateSystems/nix-installer)** — Nix 本体のインストール（Homebrew formula は削除済み）
+- **[xcodes-cli](https://github.com/XcodesOrg/xcodes)** — Xcode 複数バージョンの CLI 管理。`xcodes select` で切替
 - **Nix (flake)** — プロジェクト単位の CLI ツールチェーン管理（`aarch64-darwin`、nixpkgs unstable）
-- **direnv** — プロジェクトディレクトリ進入時の自動環境切り替え
-- **GNU Make** — 起動装置 / 手作業案内の統合
+- **direnv** — ディレクトリ進入時の環境切り替え
+- **GNU Make** — 起動と手作業案内の統合
 
 ## プロジェクト構造
 
@@ -101,13 +101,13 @@ direnv は親ディレクトリの `.envrc` を自動的に発見します。`~/
     └── .envrc
 ```
 
-`iOS/` `Android/` `Flutter/` 配下にプロジェクトリポジトリを clone する想定で、サブディレクトリは `.gitignore` で除外されています（このリポジトリ自体には flake.nix と .envrc のみ含まれる）。
+`iOS/` `Android/` `Flutter/` 配下にプロジェクトを clone する想定です。サブディレクトリは `.gitignore` で除外しており、このリポジトリには flake.nix と .envrc のみが含まれます。
 
 ## 設計
 
 ### レイヤ図
 
-上層ほどプロジェクト単位で個別化され、下層ほどマシン全体で共有されます。各層は HTML テーブル 1 つで表現し、すべて横幅 100% に揃えています。Makefile は L3〜L5 を横断する**起動装置**として機能しますが、図には含めず直後の表で説明します。
+上層ほどプロジェクト単位、下層ほどマシン単位で共有されます。Makefile は L3〜L5 を横断する**起動装置**として機能します。図には含めず、直後の表で役割を示します。
 
 <table width="100%">
   <tr><td align="center" colspan="4">🟪 <b>L1 ／ プロジェクトソースコード（個別リポジトリ）</b></td></tr>
@@ -167,7 +167,7 @@ direnv は親ディレクトリの `.envrc` を自動的に発見します。`~/
 
 ### Makefile の役割（層を横断する起動装置）
 
-Makefile はレイヤ図には現れませんが、L3〜L5 を以下のように制御します。
+Makefile はレイヤ図に含まれませんが、L3〜L5 を以下のように制御します。
 
 | ターゲット | 対象層 | 性質 |
 |---|---|---|
@@ -181,10 +181,10 @@ Makefile はレイヤ図には現れませんが、L3〜L5 を以下のように
 
 ### 設計のポイント
 
-- **再現性のグラデーション**: Nix flake 層は hash レベルで 100% 再現、Brewfile 層は概ね 95%（バージョンに揺れあり）、手作業層は 0%。完全自動化は構造的に不可能と認め、Makefile が**手作業の島を明示する**。
-- **Xcode との分業**: iOS と Flutter の flake.nix では `unset SDKROOT / DEVELOPER_DIR` を必ず入れる。これがないと Nix が提供する SDK と Xcode の SDK が衝突し、`UIKit/UIKit.h not found` などのビルドエラーが発生する。
-- **Android SDK は手動管理**: Apple Silicon では Nix の `androidenv` が非対応のため、Android Studio 経由で `~/Library/Android/sdk` に配置する前提。flake.nix からはパス参照のみ。
-- **Xcode は xcodes-cli 経由**: Apple EULA 上 Nix での再配布が不可能。Brewfile では `xcodes` のみ導入し、`xcodes install` で developer.apple.com から取得。複数バージョンの並存・切替（`xcodes select`）に対応。
+- **再現性のグラデーション**: Nix flake 層は hash レベルで 100% 再現。Brewfile 層は概ね 95%（バージョンに揺れあり）。手作業層は 0%。完全自動化は構造的に不可能と認め、Makefile が**手作業の範囲を明示**する。
+- **Xcode との分業**: iOS / Flutter の flake.nix では `SDKROOT` と `DEVELOPER_DIR` を必ず unset する。これがないと Nix と Xcode の SDK が衝突し、`UIKit/UIKit.h not found` 等のビルドエラーが出る。
+- **Android SDK は手動管理**: Apple Silicon では Nix の `androidenv` が非対応。Android Studio 経由で `~/Library/Android/sdk` に配置し、flake.nix はパス参照のみとする。
+- **Xcode は xcodes-cli 経由**: Apple EULA により Nix での再配布は不可。Brewfile で `xcodes` のみ導入し、`xcodes install` で取得。`xcodes select` で複数バージョンの切替に対応。
 
 ### 4 ファイルの役割
 
@@ -199,7 +199,7 @@ Makefile はレイヤ図には現れませんが、L3〜L5 を以下のように
 
 ### `direnv: error .envrc is blocked. Run direnv allow.`
 
-各プラットフォーム箱で初回のみ `direnv allow` を実行してください。
+各プラットフォームディレクトリで初回のみ `direnv allow` を実行してください。
 
 ```bash
 cd ~/Developer/iOS && direnv allow
@@ -209,7 +209,7 @@ cd ~/Developer/Flutter && direnv allow
 
 ### iOS ビルドで `UIKit/UIKit.h not found` 等の SDK エラー
 
-flake.nix の shellHook に `unset SDKROOT` `unset DEVELOPER_DIR` が入っているか確認してください。Nix が提供する SDK と Xcode の SDK が衝突しています。
+flake.nix の shellHook に `unset SDKROOT` と `unset DEVELOPER_DIR` があるか確認してください。Nix と Xcode の SDK が衝突しています。
 
 ### `androidenv` を flake に追加するとビルドが失敗する
 
@@ -217,11 +217,11 @@ Apple Silicon では `androidenv.composeAndroidPackages` が非対応です（[n
 
 ### `nix develop` の初回が遅い
 
-flake で指定したパッケージをすべてビルド / ダウンロードするため、初回のみ数分〜十数分かかります。2 回目以降はキャッシュにより高速。短縮したい場合は [Cachix](https://www.cachix.org/) の導入を検討してください。
+flake のパッケージを全てダウンロード / ビルドするため、初回は数分〜十数分かかります。2 回目以降はキャッシュで高速になります。短縮したい場合は [Cachix](https://www.cachix.org/) の導入を検討してください。
 
 ### `make setup-brew` で `~/Brewfile` の作成に失敗する
 
-`~/Brewfile` が既にシンボリックリンクではない実体ファイルとして存在する場合、`setup-brew` は安全のため作成を中止します。手動で退避してから再実行してください：
+`~/Brewfile` が実体ファイルとして既に存在する場合、`setup-brew` は安全のため中止します。手動で退避してから再実行してください：
 
 ```bash
 mv ~/Brewfile ~/Brewfile.bak
@@ -230,7 +230,7 @@ make setup-brew
 
 ## 既知の制約
 
-- **Android SDK の再現性が低い**: GUI 設定のため、別 Mac で完全に同じ状態にするのが難しい。将来的に `sdkmanager` CLI でのスクリプト化を検討。
+- **Android SDK の再現性が低い**: GUI 設定のため、別 Mac で同じ状態を作るのが難しい。将来的に `sdkmanager` CLI でのスクリプト化を検討。
 - **Intel Mac 非対応**: flake は `aarch64-darwin` 固定。Intel Mac で使う場合は `x86_64-darwin` への置き換えが必要。
 
 ## ライセンス
@@ -240,6 +240,6 @@ make setup-brew
 ## 謝辞
 
 - [Nix / Nixpkgs](https://nixos.org/) — 宣言的なツールチェーン管理の基盤
-- [Homebrew](https://brew.sh/) — macOS の de facto パッケージマネージャ
-- [direnv](https://direnv.net/) — ディレクトリスコープの環境変数自動切り替え
-- [Ghostty](https://github.com/ghostty-org/ghostty) — iOS Nix flake における `unset SDKROOT` の設計を参考
+- [Homebrew](https://brew.sh/) — macOS の標準的なパッケージマネージャ
+- [direnv](https://direnv.net/) — ディレクトリ単位の環境変数切り替え
+- [Ghostty](https://github.com/ghostty-org/ghostty) — iOS flake の `unset SDKROOT` 設計を参考
