@@ -1,0 +1,50 @@
+name: Verify make setup
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify-setup:
+    name: make setup (macOS / Apple Silicon)
+    runs-on: macos-14
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: make setup-brew
+        run: make setup-brew
+
+      - name: make setup-nix-install
+        run: make setup-nix-install
+
+      - name: Expose Nix on PATH for subsequent steps
+        run: |
+          echo "/nix/var/nix/profiles/default/bin" >> "$GITHUB_PATH"
+
+      - name: make setup-nix
+        run: make setup-nix
+
+      - name: make verify
+        run: make verify
+
+      - name: Validate platform flakes
+        run: |
+          set -euo pipefail
+          for dir in iOS Android Flutter; do
+            echo "==> nix flake check ./$dir"
+            nix --extra-experimental-features 'nix-command flakes' \
+                flake check "./$dir" --no-build
+          done
+
+  lint-brewfile:
+    name: Brewfile syntax check
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: brew bundle check (dry-run)
+        run: brew bundle list --file=Brewfile
