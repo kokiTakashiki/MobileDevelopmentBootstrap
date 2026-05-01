@@ -6,6 +6,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  HOMEBREW_NO_AUTO_UPDATE: "1"
+  HOMEBREW_NO_INSTALL_CLEANUP: "1"
+  HOMEBREW_BUNDLE_NO_LOCK: "1"
+
 jobs:
   verify-setup:
     name: make setup (macOS / Apple Silicon)
@@ -16,37 +21,58 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Diagnostics (pre)
+        run: |
+          set -x
+          sw_vers
+          uname -a
+          which brew && brew --version
+          ls -la /Applications | head -50 || true
+          ls -la "$HOME" | head -30 || true
+          [ -e "$HOME/Brewfile" ] && ls -la "$HOME/Brewfile" || echo "no ~/Brewfile"
+
       - name: make setup-brew
-        run: make setup-brew
+        env:
+          HOMEBREW_BUNDLE_VERBOSE: "1"
+        run: |
+          set -x
+          make setup-brew
 
       - name: make setup-nix-install
-        run: make setup-nix-install
+        run: |
+          set -x
+          make setup-nix-install
 
       - name: Expose Nix on PATH for subsequent steps
         run: |
           echo "/nix/var/nix/profiles/default/bin" >> "$GITHUB_PATH"
 
       - name: make setup-nix
-        run: make setup-nix
+        run: |
+          set -x
+          make setup-nix
 
       - name: make verify
-        run: make verify
+        run: |
+          set -x
+          make verify
 
       - name: Configure nix to use GITHUB_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           mkdir -p "$HOME/.config/nix"
           # 認証なしだと github:NixOS/nixpkgs の解決で API レートリミット (403) に当たる
           echo "access-tokens = github.com=$GITHUB_TOKEN" >> "$HOME/.config/nix/nix.conf"
 
       - name: Validate platform flakes
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           for dir in iOS Android Flutter; do
             echo "==> nix flake check ./$dir"
             nix --extra-experimental-features 'nix-command flakes' \
+                --show-trace \
                 flake check "./$dir" --no-build
           done
 
@@ -56,4 +82,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: brew bundle check (dry-run)
-        run: brew bundle list --file=Brewfile
+        run: |
+          set -x
+          brew bundle list --file=Brewfile
