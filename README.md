@@ -50,6 +50,8 @@ make setup
 
 個別実行も可能（例: `make setup-xcode` のみ、`make verify` のみ）。
 
+`flake.lock` を回したい場合は `make flake-update`（最新 nixpkgs に追従）／ 初回生成は `make flake-lock`。生成された `flake.lock` は **必ずコミット** してください — これが無いと再現性は保証されません。
+
 ## 使用方法
 
 各プラットフォーム箱（`<repo>/iOS` 等）に実プロジェクトを clone して開発します。以下の例では clone 先を `~/Developer/` としていますが、任意のパスに置き換えて読んでください。
@@ -92,12 +94,15 @@ direnv は親ディレクトリの `.envrc` を自動的に発見します。`~/
 ├── Makefile                  # 起動装置（自動 + 手動指示）
 ├── iOS/
 │   ├── flake.nix             # iOS 用 Nix 環境（SDKROOT unset 入り）
+│   ├── flake.lock            # nixpkgs リビジョンの固定（要コミット）
 │   └── .envrc                # direnv: use flake
 ├── Android/
 │   ├── flake.nix             # Android 用 Nix 環境（androidenv 不使用）
+│   ├── flake.lock
 │   └── .envrc
 └── Flutter/
     ├── flake.nix             # Flutter 用 Nix 環境（iOS + Android 統合）
+    ├── flake.lock
     └── .envrc
 ```
 
@@ -181,7 +186,7 @@ Makefile はレイヤ図には現れませんが、L3〜L5 を以下のように
 
 ### 設計のポイント
 
-- **再現性のグラデーション**: Nix flake 層は hash レベルで 100% 再現、Brewfile 層は概ね 95%（バージョンに揺れあり）、手作業層は 0%。完全自動化は構造的に不可能と認め、Makefile が**手作業の島を明示する**。
+- **再現性のグラデーション**: Nix flake 層は `flake.lock` をコミットすることで hash レベルで 100% 再現（ロックが無い場合は `nixos-unstable` の都度参照になり保証は無い）、Brewfile 層は概ね 95%（バージョンに揺れあり）、手作業層は 0%。完全自動化は構造的に不可能と認め、Makefile が**手作業の島を明示する**。
 - **Xcode との分業**: iOS と Flutter の flake.nix では `unset SDKROOT / DEVELOPER_DIR` を必ず入れる。これがないと Nix が提供する SDK と Xcode の SDK が衝突し、`UIKit/UIKit.h not found` などのビルドエラーが発生する。
 - **Android SDK は手動管理**: Apple Silicon では Nix の `androidenv` が非対応のため、Android Studio 経由で `~/Library/Android/sdk` に配置する前提。flake.nix からはパス参照のみ。
 - **Xcode は xcodes-cli 経由**: Apple EULA 上 Nix での再配布が不可能。Brewfile では `xcodes` のみ導入し、`xcodes install` で developer.apple.com から取得。複数バージョンの並存・切替（`xcodes select`）に対応。

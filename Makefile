@@ -1,7 +1,9 @@
-.PHONY: help setup setup-brew setup-nix-install setup-xcode setup-manual setup-nix verify
+.PHONY: help setup setup-brew setup-nix-install setup-xcode setup-manual setup-nix verify flake-lock flake-update
 
-# Brewfile の絶対パスを Makefile 自身の位置から解決（clone 先のディレクトリ名に依存しない）
-BREWFILE := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/Brewfile)
+# Makefile 自身の位置から各種パスを解決（clone 先のディレクトリ名に依存しない）
+ROOT     := $(dir $(lastword $(MAKEFILE_LIST)))
+BREWFILE := $(abspath $(ROOT)/Brewfile)
+FLAKES   := $(abspath $(ROOT)/iOS) $(abspath $(ROOT)/Android) $(abspath $(ROOT)/Flutter)
 
 help:
 	@echo "新しいMacのセットアップ手順"
@@ -15,6 +17,9 @@ help:
 	@echo "  make setup-manual       - 残りの手作業項目の手順を表示"
 	@echo "  make setup-nix          - Nix環境の動作確認"
 	@echo "  make verify             - 全体の動作検証"
+	@echo ""
+	@echo "  make flake-lock         - 各 flake の flake.lock を初回生成（未コミット時）"
+	@echo "  make flake-update       - 各 flake の flake.lock を最新 nixpkgs に更新"
 	@echo ""
 
 setup: setup-brew setup-nix-install setup-xcode setup-manual setup-nix verify
@@ -111,3 +116,19 @@ verify:
 	@echo "xcodes:   $$(xcodes version 2>/dev/null || echo 'Not installed')"
 	@echo "Xcode:    $$(xcodebuild -version 2>/dev/null | head -1 || echo 'Not configured')"
 	@echo "Android:  $$([ -d $(HOME)/Library/Android/sdk ] && echo 'SDK found' || echo 'SDK not configured')"
+
+flake-lock:
+	@command -v nix > /dev/null 2>&1 || (echo "Nix が入っていません。make setup-nix-install を先に実行してください" && exit 1)
+	@for d in $(FLAKES); do \
+		echo "==> $$d の flake.lock を生成"; \
+		(cd "$$d" && nix --extra-experimental-features 'nix-command flakes' flake lock); \
+	done
+	@echo "✓ flake.lock 生成完了。git add してコミットしてください"
+
+flake-update:
+	@command -v nix > /dev/null 2>&1 || (echo "Nix が入っていません。make setup-nix-install を先に実行してください" && exit 1)
+	@for d in $(FLAKES); do \
+		echo "==> $$d の flake.lock を更新"; \
+		(cd "$$d" && nix --extra-experimental-features 'nix-command flakes' flake update); \
+	done
+	@echo "✓ flake.lock 更新完了"
