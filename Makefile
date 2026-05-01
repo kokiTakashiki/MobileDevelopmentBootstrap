@@ -1,4 +1,4 @@
-.PHONY: help setup setup-brew setup-nix-install setup-xcode setup-manual setup-nix verify flake-lock flake-update
+.PHONY: help setup setup-brew setup-nix-install setup-xcode setup-manual setup-nix verify flake-lock flake-update lint
 
 # Makefile 自身の位置から各種パスを解決（clone 先のディレクトリ名に依存しない）
 ROOT     := $(dir $(lastword $(MAKEFILE_LIST)))
@@ -20,6 +20,8 @@ help:
 	@echo ""
 	@echo "  make flake-lock         - 各 flake の flake.lock を初回生成（未コミット時）"
 	@echo "  make flake-update       - 各 flake の flake.lock を最新 nixpkgs に更新"
+	@echo ""
+	@echo "  make lint               - checkmake で Makefile を静的検査（警告のみ）"
 	@echo ""
 
 setup: setup-brew setup-nix-install setup-xcode setup-manual setup-nix verify
@@ -132,3 +134,8 @@ flake-update:
 		(cd "$$d" && nix --extra-experimental-features 'nix-command flakes' flake update); \
 	done
 	@echo "✓ flake.lock 更新完了"
+
+lint:
+	@command -v checkmake > /dev/null 2>&1 || (echo "checkmake が入っていません: brew install checkmake" && exit 1)
+	@echo "==> Makefile を checkmake で検査"
+	checkmake $(abspath $(ROOT)/Makefile)
