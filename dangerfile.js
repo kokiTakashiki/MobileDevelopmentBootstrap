@@ -1,6 +1,7 @@
-// Surface `make lint` (checkmake) findings as PR warnings.
+// Surface `make lint` (checkmake) findings as PR failures.
 // The lint step writes its full output to lint.txt and always exits 0 in CI,
 // so this dangerfile is the single source of truth for whether to comment.
+// `fail()` makes Danger exit non-zero, which fails the workflow and blocks merge.
 const fs = require("fs");
 
 const LINT_OUTPUT = "lint.txt";
@@ -21,10 +22,10 @@ function checkmakeReport() {
 
 const report = checkmakeReport();
 if (report) {
-  warn(
+  fail(
     [
       "**Makefile lint** (`make lint` / checkmake) で以下を検出しました。",
-      "公開ブロッカーではないので任意修正で OK です。",
+      "マージ前に修正してください。",
       "",
       "```",
       report,

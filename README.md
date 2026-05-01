@@ -59,7 +59,7 @@ make setup
 - **`.editorconfig`**: 行末スペース / 改行 / 文字コード / `Makefile` の TAB インデントを宣言。エディタが対応していれば編集時点で揃います。
 - **`make lint`**: [checkmake](https://github.com/checkmake/checkmake) で `Makefile` を静的検査（`.PHONY` 漏れ・行長など）。Brewfile に同梱しているので `make setup-brew` 後に利用可能。
 
-PR 作成時は GitHub Actions（`.github/workflows/lint.yml`）で `make lint` が走り、警告があれば [Danger](https://danger.systems/js/) が PR にコメントを残します。**警告はブロッカー扱いではなく**、別途修正する運用です。
+PR 作成時は GitHub Actions（`.github/workflows/lint.yml`）で `make lint` が走り、違反があれば [Danger](https://danger.systems/js/) が PR にコメントを残し **CI を失敗させます**。マージ前に違反を解消する運用です（恒久的な許容が必要な場合は `checkmake.ini` でルール調整）。
 
 ## 使用方法
 
