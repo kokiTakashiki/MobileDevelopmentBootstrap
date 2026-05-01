@@ -57,7 +57,7 @@ make setup
 このリポジトリの **要は `Makefile`** なので、記述揺らぎを抑える仕組みを 2 段で入れています：
 
 - **`.editorconfig`**: 行末スペース / 改行 / 文字コード / `Makefile` の TAB インデントを宣言。エディタが対応していれば編集時点で揃います。
-- **`make lint`**: [checkmake](https://github.com/mrtazz/checkmake) で `Makefile` を静的検査（`.PHONY` 漏れ・行長など）。Brewfile に同梱しているので `make setup-brew` 後に利用可能。
+- **`make lint`**: [checkmake](https://github.com/checkmake/checkmake) で `Makefile` を静的検査（`.PHONY` 漏れ・行長など）。Brewfile に同梱しているので `make setup-brew` 後に利用可能。
 
 PR 作成時は GitHub Actions（`.github/workflows/lint.yml`）で `make lint` が走り、警告があれば [Danger](https://danger.systems/js/) が PR にコメントを残します。**警告はブロッカー扱いではなく**、別途修正する運用です。
 

@@ -10,25 +10,33 @@ permissions:
 jobs:
   makefile-lint:
     runs-on: ubuntu-latest
+    env:
+      CHECKMAKE_VERSION: v0.3.2
+      CHECKMAKE_SHA256: e2effb876913f3ee2caef0ba35f6202c5e8a3cd55a077d8d2b9ce2034257b6af
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version: stable
-
-      - name: Install checkmake
+      - name: Install checkmake (precompiled release)
         run: |
-          go install github.com/mrtazz/checkmake/cmd/checkmake@latest
-          echo "$HOME/go/bin" >> "$GITHUB_PATH"
+          set -euo pipefail
+          asset="checkmake-${CHECKMAKE_VERSION}.linux.amd64"
+          url="https://github.com/checkmake/checkmake/releases/download/${CHECKMAKE_VERSION}/${asset}"
+          curl -fsSL "$url" -o /tmp/checkmake
+          actual=$(sha256sum /tmp/checkmake | awk '{print $1}')
+          if [ "$actual" != "$CHECKMAKE_SHA256" ]; then
+            echo "checkmake checksum mismatch (expected ${CHECKMAKE_SHA256}, got ${actual})" >&2
+            exit 1
+          fi
+          chmod +x /tmp/checkmake
+          sudo mv /tmp/checkmake /usr/local/bin/checkmake
+          checkmake --version
 
       - name: Run make lint
         run: |
           set +e
           make lint > lint.txt 2>&1
-          status=$?
+          echo "exit=$?" > lint.status
           cat lint.txt
-          echo "exit=$status" > lint.status
           exit 0
 
       - uses: actions/setup-node@v4
