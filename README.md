@@ -101,6 +101,7 @@ direnv は親ディレクトリの `.envrc` を自動探索します。`~/Develo
 ├── .gitignore                # secrets / build成果物 / プロジェクトソースを除外
 ├── .editorconfig             # 行末・インデントの揺らぎ防止
 ├── .github/workflows/lint.yml # PR で make lint を実行し Danger でコメント
+├── checkmake.ini             # checkmake のルール調整
 ├── dangerfile.js             # checkmake の出力を PR コメントに変換
 ├── Brewfile                  # マシン単位の GUI / CLI アプリ宣言
 ├── Makefile                  # 起動装置（自動 + 手動指示）

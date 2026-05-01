@@ -138,4 +138,4 @@ flake-update:
 lint:
 	@command -v checkmake > /dev/null 2>&1 || (echo "checkmake が入っていません: brew install checkmake" && exit 1)
 	@echo "==> Makefile を checkmake で検査"
-	checkmake $(abspath $(ROOT)/Makefile)
+	checkmake --config $(abspath $(ROOT)/checkmake.ini) $(abspath $(ROOT)/Makefile)
