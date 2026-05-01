@@ -32,6 +32,15 @@ jobs:
       - name: make verify
         run: make verify
 
+      - name: Configure nix to use GITHUB_TOKEN
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.config/nix"
+          # 認証なしだと github:NixOS/nixpkgs の解決で API レートリミット (403) に当たる
+          echo "access-tokens = github.com=$GITHUB_TOKEN" >> "$HOME/.config/nix/nix.conf"
+
       - name: Validate platform flakes
         run: |
           set -euo pipefail
