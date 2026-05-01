@@ -1,0 +1,49 @@
+name: Lint
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  makefile-lint:
+    runs-on: ubuntu-latest
+    env:
+      CHECKMAKE_VERSION: v0.3.2
+      CHECKMAKE_SHA256: e2effb876913f3ee2caef0ba35f6202c5e8a3cd55a077d8d2b9ce2034257b6af
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install checkmake (precompiled release)
+        run: |
+          set -euo pipefail
+          asset="checkmake-${CHECKMAKE_VERSION}.linux.amd64"
+          url="https://github.com/checkmake/checkmake/releases/download/${CHECKMAKE_VERSION}/${asset}"
+          curl -fsSL "$url" -o /tmp/checkmake
+          actual=$(sha256sum /tmp/checkmake | awk '{print $1}')
+          if [ "$actual" != "$CHECKMAKE_SHA256" ]; then
+            echo "checkmake checksum mismatch (expected ${CHECKMAKE_SHA256}, got ${actual})" >&2
+            exit 1
+          fi
+          chmod +x /tmp/checkmake
+          sudo mv /tmp/checkmake /usr/local/bin/checkmake
+          checkmake --version
+
+      - name: Run make lint
+        run: |
+          set +e
+          make lint > lint.txt 2>&1
+          echo "exit=$?" > lint.status
+          cat lint.txt
+          exit 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Danger
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx --yes danger@12 ci
