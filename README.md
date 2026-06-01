@@ -1,6 +1,6 @@
 # Mobile Development Bootstrap
 
-macOS（Apple Silicon）で iOS / Android / Flutter の開発環境を**宣言的・再現可能**に構築します。Brewfile・Makefile・Nix flake の最小構成で、新しい Mac を最短手順で復元できます。
+macOS（Apple Silicon）で iOS / Android / Flutter の開発環境を**宣言的・再現可能**に構築します。Brewfile・Makefile・Nix flake の最小構成で、新しいMacをセットアップできます。
 
 ## 機能
 
